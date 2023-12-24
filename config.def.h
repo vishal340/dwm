@@ -149,7 +149,7 @@ static const Key keys[] = {
      SHCMD("$HOME/Downloads/dwm/scripts/powermenu.sh")},
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
-    {MODKEY, XK_p, spawn, {.v = dmenucmd}},
+    {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
     {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
