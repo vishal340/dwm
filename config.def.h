@@ -63,7 +63,8 @@ static Sp scratchpads[] = {
 };
 
 /* tagging */
-static const char *tags[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+static const char *tags[] = {"1", "2", "3", "4", "5", "6",
+                             "7", "8", "9", "0", "-", "="};
 
 static const Rule rules[] = {
     /* xprop(1):
@@ -72,7 +73,9 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {"microsoft-edge-dev", NULL, NULL, 2, 0, -1, 40, 30, 150, 100, 1},
+    {"microsoft-edge-stable", NULL, NULL, 1 << 1, 0, -1, 40, 23, 80, 45, 1},
+    {"bitwarden-desktop", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
+    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 40, 23, 48, 27, 1},
 };
 
 /* layout(s) */
@@ -156,6 +159,8 @@ static const Key keys[] = {
     {MODKEY, XK_s, togglesticky, {0}},
     {MODKEY, XK_j, focusstack, {.i = +1}},
     {MODKEY, XK_k, focusstack, {.i = -1}},
+    {MODKEY | ShiftMask, XK_j, inplacerotate, {.i = +1}},
+    {MODKEY | ShiftMask, XK_k, inplacerotate, {.i = -1}},
     {MODKEY, XK_i, incnmaster, {.i = +1}},
     {MODKEY, XK_d, incnmaster, {.i = -1}},
     {MODKEY, XK_h, setmfact, {.f = -0.05}},
@@ -171,7 +176,7 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[4]}},
     {MODKEY, XK_space, setlayout, {0}},
     {MODKEY | ShiftMask, XK_space, togglefloating, {0}},
-    {MODKEY, XK_0, view, {.ui = ~0}},
+    // {MODKEY, XK_0, view, {.ui = ~0}},
     {MODKEY | ShiftMask, XK_0, tag, {.ui = ~0}},
     {MODKEY, XK_comma, focusmon, {.i = -1}},
     {MODKEY, XK_period, focusmon, {.i = +1}},
@@ -184,10 +189,11 @@ static const Key keys[] = {
     {MODKEY, XK_x, togglescratch, {.ui = 2}},
     TAGKEYS(XK_1, 0) TAGKEYS(XK_2, 1) TAGKEYS(XK_3, 2) TAGKEYS(XK_4, 3)
         TAGKEYS(XK_5, 4) TAGKEYS(XK_6, 5) TAGKEYS(XK_7, 6) TAGKEYS(XK_8, 7)
-            TAGKEYS(XK_9, 8){MODKEY | ShiftMask, XK_q, quit, {0}},
+            TAGKEYS(XK_9, 8) TAGKEYS(XK_0, 9) TAGKEYS(XK_minus, 10)
+                TAGKEYS(XK_equal, 11){MODKEY | ShiftMask, XK_q, quit, {0}},
     {MODKEY, XK_semicolon, togglemark, {0}},
     {MODKEY, XK_o, swapfocus, {0}},
-    {MODKEY, XK_u, swapclient, {0}},
+    {MODKEY | ShiftMask, XK_o, swapclient, {0}},
 };
 
 /* button definitions */
