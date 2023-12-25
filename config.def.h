@@ -88,14 +88,12 @@ static const int lockfullscreen =
 
 #include "layouts.c"
 #define FORCE_VSPLIT 1
-#include "nrowgrid.c"
 
 static const Layout layouts[] = {
     /* symbol     arrange function */
     {"[]=", tile}, /* first entry is default */
     {"><>", NULL}, /* no layout function means floating behavior */
-    {"[M]", monocle},     {"HHH", grid},     {"TTT", bstack},
-    {"===", bstackhoriz}, {"###", nrowgrid},
+    {"[M]", monocle}, {"HHH", grid}, {"TTT", bstack}, {"===", bstackhoriz},
 };
 
 /* key definitions */
@@ -148,8 +146,7 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("transset-df -a --dec .1")},
     {MODKEY | ShiftMask, XK_d, spawn, SHCMD("transset-df -a --inc .1")},
     {MODKEY | ShiftMask, XK_f, spawn, SHCMD("transset-df -a .75")},
-    {MODKEY | ShiftMask, XK_e, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/powermenu.sh")},
+    {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
@@ -159,8 +156,6 @@ static const Key keys[] = {
     {MODKEY, XK_s, togglesticky, {0}},
     {MODKEY, XK_j, focusstack, {.i = +1}},
     {MODKEY, XK_k, focusstack, {.i = -1}},
-    {MODKEY | ShiftMask, XK_j, inplacerotate, {.i = +1}},
-    {MODKEY | ShiftMask, XK_k, inplacerotate, {.i = -1}},
     {MODKEY, XK_i, incnmaster, {.i = +1}},
     {MODKEY, XK_d, incnmaster, {.i = -1}},
     {MODKEY, XK_h, setmfact, {.f = -0.05}},
@@ -172,8 +167,8 @@ static const Key keys[] = {
     {MODKEY, XK_f, setlayout, {.v = &layouts[1]}},
     {MODKEY, XK_m, setlayout, {.v = &layouts[2]}},
     {MODKEY, XK_g, setlayout, {.v = &layouts[3]}},
-    {MODKEY | ShiftMask, XK_t, setlayout, {.v = &layouts[3]}},
-    {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[4]}},
+    {MODKEY | ShiftMask, XK_t, setlayout, {.v = &layouts[4]}},
+    {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[5]}},
     {MODKEY, XK_space, setlayout, {0}},
     {MODKEY | ShiftMask, XK_space, togglefloating, {0}},
     // {MODKEY, XK_0, view, {.ui = ~0}},
@@ -182,6 +177,10 @@ static const Key keys[] = {
     {MODKEY, XK_period, focusmon, {.i = +1}},
     {MODKEY | ShiftMask, XK_comma, tagmon, {.i = -1}},
     {MODKEY | ShiftMask, XK_period, tagmon, {.i = +1}},
+    {MODKEY, XK_Right, viewnext, {0}},
+    {MODKEY, XK_Left, viewprev, {0}},
+    {MODKEY | ShiftMask, XK_Right, tagtonext, {0}},
+    {MODKEY | ShiftMask, XK_Left, tagtoprev, {0}},
     {Mod1Mask, XK_Tab, altTabStart, {.i = 1}},
     {Mod1Mask | ShiftMask, XK_Tab, altTabStart, {.i = 0}},
     {MODKEY, XK_y, togglescratch, {.ui = 0}},

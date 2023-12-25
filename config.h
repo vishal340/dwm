@@ -31,7 +31,6 @@ static const int systraypinningfailfirst =
 static const int showsystray = 1; /* 0 means no systray */
 static const int showbar = 1;     /* 0 means no bar */
 static const int topbar = 1;      /* 0 means bottom bar */
-static const double defaultopacity = 0.8;
 static const char *fonts[] = {"monospace:size=10"};
 static const char dmenufont[] = "monospace:size=10";
 static const char col_gray1[] = "#222222";
@@ -143,9 +142,6 @@ static const Key keys[] = {
     {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
     {ShiftMask, XK_Print, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/screenshotsel.sh")},
-    {MODKEY | ShiftMask, XK_s, spawn, SHCMD("transset-df -a --dec .1")},
-    {MODKEY | ShiftMask, XK_d, spawn, SHCMD("transset-df -a --inc .1")},
-    {MODKEY | ShiftMask, XK_f, spawn, SHCMD("transset-df -a .75")},
     {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
@@ -156,8 +152,6 @@ static const Key keys[] = {
     {MODKEY, XK_s, togglesticky, {0}},
     {MODKEY, XK_j, focusstack, {.i = +1}},
     {MODKEY, XK_k, focusstack, {.i = -1}},
-    {MODKEY | ShiftMask, XK_j, inplacerotate, {.i = +1}},
-    {MODKEY | ShiftMask, XK_k, inplacerotate, {.i = -1}},
     {MODKEY, XK_i, incnmaster, {.i = +1}},
     {MODKEY, XK_d, incnmaster, {.i = -1}},
     {MODKEY, XK_h, setmfact, {.f = -0.05}},
@@ -179,6 +173,10 @@ static const Key keys[] = {
     {MODKEY, XK_period, focusmon, {.i = +1}},
     {MODKEY | ShiftMask, XK_comma, tagmon, {.i = -1}},
     {MODKEY | ShiftMask, XK_period, tagmon, {.i = +1}},
+    {MODKEY, XK_Right, viewnext, {0}},
+    {MODKEY, XK_Left, viewprev, {0}},
+    {MODKEY | ShiftMask, XK_Right, tagtonext, {0}},
+    {MODKEY | ShiftMask, XK_Left, tagtoprev, {0}},
     {Mod1Mask, XK_Tab, altTabStart, {.i = 1}},
     {Mod1Mask | ShiftMask, XK_Tab, altTabStart, {.i = 0}},
     {MODKEY, XK_y, togglescratch, {.ui = 0}},

@@ -101,7 +101,6 @@ enum {
   NetWMWindowType,
   NetWMWindowTypeDialog,
   NetClientList,
-  NetWMWindowsOpacity,
   NetLast,
 };                                           /* EWMH atoms */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
@@ -244,7 +243,6 @@ static void drawbar(Monitor *m);
 static void drawbars(void);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
-static void opacity(Client *c, double opacity);
 static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
@@ -257,7 +255,6 @@ static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
 static void incnmaster(const Arg *arg);
-static void inplacerotate(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
@@ -268,6 +265,7 @@ static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void pop(Client *c);
+static unsigned int prevtag(void);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -300,6 +298,8 @@ static void swapfocus(const Arg *arg);
 static Monitor *systraytomon(Monitor *m);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
+static void tagtonext(const Arg *arg);
+static void tagtoprev(const Arg *arg);
 static void tile(Monitor *m);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
@@ -325,6 +325,8 @@ static void updatetitle(Client *c);
 static void updatewindowtype(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
+static void viewnext(const Arg *arg);
+static void viewprev(const Arg *arg);
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
 static Client *wintosystrayicon(Window w);
@@ -964,15 +966,6 @@ void expose(XEvent *e) {
   }
 }
 
-void opacity(Client *c, double opacity) {
-  if (opacity >= 0 && opacity <= 1) {
-    unsigned long real_opacity[] = {opacity * 0xffffffff};
-    XChangeProperty(dpy, c->win, netatom[NetWMWindowsOpacity], XA_CARDINAL, 32,
-                    PropModeReplace, (unsigned char *)real_opacity, 1);
-  } else
-    XDeleteProperty(dpy, c->win, netatom[NetWMWindowsOpacity]);
-}
-
 void focus(Client *c) {
   if (!c || !ISVISIBLE(c))
     for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext)
@@ -1227,7 +1220,6 @@ void manage(Window w, XWindowAttributes *wa) {
   c->oldbw = wa->border_width;
 
   updatetitle(c);
-  opacity(c, defaultopacity);
   getclassname(c);
   if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
     c->mon = t->mon;
@@ -1391,6 +1383,11 @@ void movemouse(const Arg *arg) {
   }
 }
 
+unsigned int nexttag(void) {
+  unsigned int seltag = selmon->tagset[selmon->seltags];
+  return seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
+}
+
 Client *nexttiled(Client *c) {
   for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next)
     ;
@@ -1402,6 +1399,11 @@ void pop(Client *c) {
   attach(c);
   focus(c);
   arrange(c->mon);
+}
+
+unsigned int prevtag(void) {
+  unsigned int seltag = selmon->tagset[selmon->seltags];
+  return seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
 }
 
 void propertynotify(XEvent *e) {
@@ -1903,8 +1905,6 @@ void setup(void) {
   netatom[NetWMFullscreen] =
       XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
   netatom[NetWMSticky] = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
-  netatom[NetWMWindowsOpacity] =
-      XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
   netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
   netatom[NetWMWindowTypeDialog] =
       XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
@@ -2376,6 +2376,28 @@ void tagmon(const Arg *arg) {
   if (!selmon->sel || !mons->next)
     return;
   sendmon(selmon->sel, dirtomon(arg->i));
+}
+
+void tagtonext(const Arg *arg) {
+  unsigned int tmp;
+
+  if (selmon->sel == NULL)
+    return;
+
+  tmp = nexttag();
+  tag(&(const Arg){.ui = tmp});
+  view(&(const Arg){.ui = tmp});
+}
+
+void tagtoprev(const Arg *arg) {
+  unsigned int tmp;
+
+  if (selmon->sel == NULL)
+    return;
+
+  tmp = prevtag();
+  tag(&(const Arg){.ui = tmp});
+  view(&(const Arg){.ui = tmp});
 }
 
 void tile(Monitor *m) {
@@ -2910,6 +2932,10 @@ void view(const Arg *arg) {
   arrange(selmon);
 }
 
+void viewnext(const Arg *arg) { view(&(const Arg){.ui = nexttag()}); }
+
+void viewprev(const Arg *arg) { view(&(const Arg){.ui = prevtag()}); }
+
 Client *wintoclient(Window w) {
   Client *c;
   Monitor *m;
@@ -3087,82 +3113,4 @@ int main(int argc, char *argv[]) {
   cleanup();
   XCloseDisplay(dpy);
   return EXIT_SUCCESS;
-}
-
-void insertclient(Client *item, Client *insertItem, int after) {
-  Client *c;
-  if (item == NULL || insertItem == NULL || item == insertItem)
-    return;
-  detach(insertItem);
-  if (!after && selmon->clients == item) {
-    attach(insertItem);
-    return;
-  }
-  if (after) {
-    c = item;
-  } else {
-    for (c = selmon->clients; c; c = c->next) {
-      if (c->next == item)
-        break;
-    }
-  }
-  insertItem->next = c->next;
-  c->next = insertItem;
-}
-
-void inplacerotate(const Arg *arg) {
-  if (!selmon->sel || (selmon->sel->isfloating && !arg->f))
-    return;
-
-  unsigned int selidx = 0, i = 0;
-  Client *c = NULL, *stail = NULL, *mhead = NULL, *mtail = NULL, *shead = NULL;
-
-  // Determine positionings for insertclient
-  for (c = selmon->clients; c; c = c->next) {
-    if (ISVISIBLE(c) && !(c->isfloating)) {
-      if (selmon->sel == c) {
-        selidx = i;
-      }
-      if (i == selmon->nmaster - 1) {
-        mtail = c;
-      }
-      if (i == selmon->nmaster) {
-        shead = c;
-      }
-      if (mhead == NULL) {
-        mhead = c;
-      }
-      stail = c;
-      i++;
-    }
-  }
-
-  // All clients rotate
-  if (arg->i == 2)
-    insertclient(selmon->clients, stail, 0);
-  if (arg->i == -2)
-    insertclient(stail, selmon->clients, 1);
-  // Stack xor master rotate
-  if (arg->i == -1 && selidx >= selmon->nmaster)
-    insertclient(stail, shead, 1);
-  if (arg->i == 1 && selidx >= selmon->nmaster)
-    insertclient(shead, stail, 0);
-  if (arg->i == -1 && selidx < selmon->nmaster)
-    insertclient(mtail, mhead, 1);
-  if (arg->i == 1 && selidx < selmon->nmaster)
-    insertclient(mhead, mtail, 0);
-
-  // Restore focus position
-  i = 0;
-  for (c = selmon->clients; c; c = c->next) {
-    if (!ISVISIBLE(c) || (c->isfloating))
-      continue;
-    if (i == selidx) {
-      focus(c);
-      break;
-    }
-    i++;
-  }
-  arrange(selmon);
-  focus(c);
 }
