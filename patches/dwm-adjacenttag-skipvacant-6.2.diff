@@ -1,6 +1,6 @@
 diff -up a/config.def.h b/config.def.h
---- a/config.def.h	2021-10-02 13:57:18.011307099 +0100
-+++ b/config.def.h	2021-10-02 13:58:07.812080253 +0100
+--- a/config.def.h	2021-10-02 14:22:28.034782413 +0100
++++ b/config.def.h	2021-10-02 14:22:28.044723532 +0100
 @@ -84,6 +84,10 @@ static Key keys[] = {
  	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
  	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
@@ -13,8 +13,8 @@ diff -up a/config.def.h b/config.def.h
  	TAGKEYS(                        XK_2,                      1)
  	TAGKEYS(                        XK_3,                      2)
 diff -up a/dwm.c b/dwm.c
---- a/dwm.c	2021-10-02 13:57:18.011307099 +0100
-+++ b/dwm.c	2021-10-02 14:21:17.063622953 +0100
+--- a/dwm.c	2021-10-02 14:22:28.034782413 +0100
++++ b/dwm.c	2021-10-02 14:27:54.599845767 +0100
 @@ -183,8 +183,10 @@ static void maprequest(XEvent *e);
  static void monocle(Monitor *m);
  static void motionnotify(XEvent *e);
@@ -44,7 +44,7 @@ diff -up a/dwm.c b/dwm.c
  static Client *wintoclient(Window w);
  static Monitor *wintomon(Window w);
  static int xerror(Display *dpy, XErrorEvent *ee);
-@@ -1192,6 +1198,13 @@ movemouse(const Arg *arg)
+@@ -1192,6 +1198,29 @@ movemouse(const Arg *arg)
  	}
  }
  
@@ -52,13 +52,29 @@ diff -up a/dwm.c b/dwm.c
 +nexttag(void)
 +{
 +	unsigned int seltag = selmon->tagset[selmon->seltags];
-+	return seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
++	unsigned int usedtags = 0;
++	Client *c = selmon->clients;
++
++	if (!c)
++		return seltag;
++
++	/* skip vacant tags */
++	do {
++		usedtags |= c->tags;
++		c = c->next;
++	} while (c);
++
++	do {
++		seltag = seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
++	} while (!(seltag & usedtags));
++
++	return seltag;
 +}
 +
  Client *
  nexttiled(Client *c)
  {
-@@ -1208,6 +1221,13 @@ pop(Client *c)
+@@ -1208,6 +1237,28 @@ pop(Client *c)
  	arrange(c->mon);
  }
  
@@ -66,13 +82,28 @@ diff -up a/dwm.c b/dwm.c
 +prevtag(void)
 +{
 +	unsigned int seltag = selmon->tagset[selmon->seltags];
-+	return seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
++	unsigned int usedtags = 0;
++	Client *c = selmon->clients;
++	if (!c)
++		return seltag;
++
++	/* skip vacant tags */
++	do {
++		usedtags |= c->tags;
++		c = c->next;
++	} while (c);
++
++	do {
++		seltag = seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
++	} while (!(seltag & usedtags));
++
++	return seltag;
 +}
 +
  void
  propertynotify(XEvent *e)
  {
-@@ -1671,6 +1691,32 @@ tagmon(const Arg *arg)
+@@ -1671,6 +1722,36 @@ tagmon(const Arg *arg)
  }
  
  void
@@ -83,7 +114,9 @@ diff -up a/dwm.c b/dwm.c
 +	if (selmon->sel == NULL)
 +		return;
 +
-+	tmp = nexttag();
++	if ((tmp = nexttag()) == selmon->tagset[selmon->seltags])
++		return;
++
 +	tag(&(const Arg){.ui = tmp });
 +	view(&(const Arg){.ui = tmp });
 +}
@@ -96,7 +129,9 @@ diff -up a/dwm.c b/dwm.c
 +	if (selmon->sel == NULL)
 +		return;
 +
-+	tmp = prevtag();
++	if ((tmp = prevtag()) == selmon->tagset[selmon->seltags])
++		return;
++
 +	tag(&(const Arg){.ui = tmp });
 +	view(&(const Arg){.ui = tmp });
 +}
@@ -105,7 +140,7 @@ diff -up a/dwm.c b/dwm.c
  tile(Monitor *m)
  {
  	unsigned int i, n, h, mw, my, ty;
-@@ -2044,6 +2090,18 @@ view(const Arg *arg)
+@@ -2044,6 +2125,18 @@ view(const Arg *arg)
  	arrange(selmon);
  }
  

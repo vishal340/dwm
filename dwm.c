@@ -1385,7 +1385,23 @@ void movemouse(const Arg *arg) {
 
 unsigned int nexttag(void) {
   unsigned int seltag = selmon->tagset[selmon->seltags];
-  return seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
+  unsigned int usedtags = 0;
+  Client *c = selmon->clients;
+
+  if (!c)
+    return seltag;
+
+  /* skip vacant tags */
+  do {
+    usedtags |= c->tags;
+    c = c->next;
+  } while (c);
+
+  do {
+    seltag = seltag == (1 << (LENGTH(tags) - 1)) ? 1 : seltag << 1;
+  } while (!(seltag & usedtags));
+
+  return seltag;
 }
 
 Client *nexttiled(Client *c) {
@@ -1394,16 +1410,31 @@ Client *nexttiled(Client *c) {
   return c;
 }
 
+unsigned int prevtag(void) {
+  unsigned int seltag = selmon->tagset[selmon->seltags];
+  unsigned int usedtags = 0;
+  Client *c = selmon->clients;
+  if (!c)
+    return seltag;
+
+  /* skip vacant tags */
+  do {
+    usedtags |= c->tags;
+    c = c->next;
+  } while (c);
+
+  do {
+    seltag = seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
+  } while (!(seltag & usedtags));
+
+  return seltag;
+}
+
 void pop(Client *c) {
   detach(c);
   attach(c);
   focus(c);
   arrange(c->mon);
-}
-
-unsigned int prevtag(void) {
-  unsigned int seltag = selmon->tagset[selmon->seltags];
-  return seltag == 1 ? (1 << (LENGTH(tags) - 1)) : seltag >> 1;
 }
 
 void propertynotify(XEvent *e) {
@@ -1446,6 +1477,32 @@ void propertynotify(XEvent *e) {
     if (ev->atom == netatom[NetWMWindowType])
       updatewindowtype(c);
   }
+}
+
+void tagtonext(const Arg *arg) {
+  unsigned int tmp;
+
+  if (selmon->sel == NULL)
+    return;
+
+  if ((tmp = nexttag()) == selmon->tagset[selmon->seltags])
+    return;
+
+  tag(&(const Arg){.ui = tmp});
+  view(&(const Arg){.ui = tmp});
+}
+
+void tagtoprev(const Arg *arg) {
+  unsigned int tmp;
+
+  if (selmon->sel == NULL)
+    return;
+
+  if ((tmp = prevtag()) == selmon->tagset[selmon->seltags])
+    return;
+
+  tag(&(const Arg){.ui = tmp});
+  view(&(const Arg){.ui = tmp});
 }
 
 void quit(const Arg *arg) { running = 0; }
@@ -2376,28 +2433,6 @@ void tagmon(const Arg *arg) {
   if (!selmon->sel || !mons->next)
     return;
   sendmon(selmon->sel, dirtomon(arg->i));
-}
-
-void tagtonext(const Arg *arg) {
-  unsigned int tmp;
-
-  if (selmon->sel == NULL)
-    return;
-
-  tmp = nexttag();
-  tag(&(const Arg){.ui = tmp});
-  view(&(const Arg){.ui = tmp});
-}
-
-void tagtoprev(const Arg *arg) {
-  unsigned int tmp;
-
-  if (selmon->sel == NULL)
-    return;
-
-  tmp = prevtag();
-  tag(&(const Arg){.ui = tmp});
-  view(&(const Arg){.ui = tmp});
 }
 
 void tile(Monitor *m) {
