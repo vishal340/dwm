@@ -88,13 +88,12 @@ static const int lockfullscreen =
 
 #include "layouts.c"
 #define FORCE_VSPLIT 1
-#include "nrowgrid.c"
 
 static const Layout layouts[] = {
     /* symbol     arrange function */
     {"[]=", tile}, /* first entry is default */
     {"><>", NULL}, /* no layout function means floating behavior */
-    {"[M]", monocle}, {"HHH", grid}, {"TTT", bstack}, {"###", nrowgrid},
+    {"[M]", monocle}, {"HHH", grid}, {"TTT", bstack}, {"===", bstackhoriz},
 };
 
 /* key definitions */
@@ -147,8 +146,7 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_s, spawn, SHCMD("transset-df -a --dec .1")},
     {MODKEY | ShiftMask, XK_d, spawn, SHCMD("transset-df -a --inc .1")},
     {MODKEY | ShiftMask, XK_f, spawn, SHCMD("transset-df -a .75")},
-    {MODKEY | ShiftMask, XK_e, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/powermenu.sh")},
+    {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},

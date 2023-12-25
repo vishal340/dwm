@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 case "$(printf "Shutdown\nReboot\nLock\n" | dmenu -l 10 -i -p "System:")" in
 	"Shutdown") sudo poweroff ;;
