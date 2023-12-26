@@ -75,6 +75,6 @@ static const struct arg args[] = {
     {battery_state, " 󰁹%s", "BAT0"},
     {battery_perc, "%s%%", "BAT0"},
     {run_command, "  %s",
-     "amixer sget Master | awk -F'[][]' '/Mono:/ { print $2 }'"},
+     "amixer sget Master | awk -F'[][]' '/(Mono:|Right:).*on/ { print $2 }'"},
     {run_command, " 󰃞 %s%%", "brightnessctl g"},
 };

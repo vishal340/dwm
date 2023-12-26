@@ -145,6 +145,8 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
+    {MODKEY | ShiftMask, XK_r, spawn,
+     SHCMD("$HOME/Downloads/dwm/scripts/refresh.sh")},
     {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
