@@ -31,7 +31,6 @@ static const int systraypinningfailfirst =
 static const int showsystray = 1; /* 0 means no systray */
 static const int showbar = 1;     /* 0 means no bar */
 static const int topbar = 1;      /* 0 means bottom bar */
-static const double defaultopacity = 0.8;
 static const char *fonts[] = {"monospace:size=10"};
 static const char dmenufont[] = "monospace:size=10";
 static const char col_gray1[] = "#222222";
@@ -75,7 +74,7 @@ static const Rule rules[] = {
        float x,y,w,h         floatborderpx*/
     {"microsoft-edge-stable", NULL, NULL, 1 << 1, 0, -1, 40, 23, 80, 45, 1},
     {"bitwarden-desktop", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
-    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 40, 23, 48, 27, 1},
+    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
 };
 
 /* layout(s) */
@@ -87,7 +86,6 @@ static const int lockfullscreen =
     1; /* 1 will force focus on the fullscreen window */
 
 #include "layouts.c"
-#define FORCE_VSPLIT 1
 
 static const Layout layouts[] = {
     /* symbol     arrange function */
@@ -143,9 +141,6 @@ static const Key keys[] = {
     {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
     {ShiftMask, XK_Print, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/screenshotsel.sh")},
-    {MODKEY | ShiftMask, XK_s, spawn, SHCMD("transset-df -a --dec .1")},
-    {MODKEY | ShiftMask, XK_d, spawn, SHCMD("transset-df -a --inc .1")},
-    {MODKEY | ShiftMask, XK_f, spawn, SHCMD("transset-df -a .75")},
     {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},

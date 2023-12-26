@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=dwm
+Comment=dynamic window manager
+Exec=/home/vishal340/.local/bin/startdwm
+TryExec=dwm
+Type=Application
+X-LightDM-DesktopName=dwm
+DesktopNames=dwm
+Keywords=wm;windowmanager;window;manager;

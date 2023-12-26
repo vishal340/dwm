@@ -74,7 +74,7 @@ static const Rule rules[] = {
        float x,y,w,h         floatborderpx*/
     {"microsoft-edge-stable", NULL, NULL, 1 << 1, 0, -1, 40, 23, 80, 45, 1},
     {"bitwarden-desktop", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
-    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 40, 23, 48, 27, 1},
+    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
 };
 
 /* layout(s) */
@@ -86,7 +86,6 @@ static const int lockfullscreen =
     1; /* 1 will force focus on the fullscreen window */
 
 #include "layouts.c"
-#define FORCE_VSPLIT 1
 
 static const Layout layouts[] = {
     /* symbol     arrange function */
