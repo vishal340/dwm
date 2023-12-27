@@ -138,6 +138,7 @@ static const Key keys[] = {
     {0, 0x1008FF12, spawn, {.v = mute_vol}},
     {0, 0x1008FF11, spawn, {.v = down_vol}},
     {0, 0x1008FF13, spawn, {.v = up_vol}},
+    {MODKEY, XK_Tab, spawn, SHCMD("$HOME/Downloads/dwm/scripts/switch.sh")},
     {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
     {ShiftMask, XK_Print, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/screenshotsel.sh")},
@@ -187,8 +188,7 @@ static const Key keys[] = {
     {MODKEY, XK_x, togglescratch, {.ui = 2}},
     TAGKEYS(XK_1, 0) TAGKEYS(XK_2, 1) TAGKEYS(XK_3, 2) TAGKEYS(XK_4, 3)
         TAGKEYS(XK_5, 4) TAGKEYS(XK_6, 5) TAGKEYS(XK_7, 6) TAGKEYS(XK_8, 7)
-            TAGKEYS(XK_9, 8) TAGKEYS(XK_0, 9) TAGKEYS(XK_minus, 10)
-                TAGKEYS(XK_equal, 11){MODKEY | ShiftMask, XK_q, quit, {0}},
+            TAGKEYS(XK_9, 8){MODKEY | ShiftMask, XK_q, quit, {0}},
     {MODKEY, XK_semicolon, togglemark, {0}},
     {MODKEY | ShiftMask, XK_semicolon, swapfocus, {0}},
     {MODKEY | ControlMask | ShiftMask, XK_semicolon, swapclient, {0}},

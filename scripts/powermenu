@@ -1,6 +1,6 @@
 #!/bin/sh
 
-case "$(printf "Shutdown\nReboot\nLock\n" | dmenu -l 10 -i -p "System:")" in
+case "$(printf "Shutdown\nReboot\n" | dmenu -l 10 -i -p "System:")" in
 "Shutdown") systemctl poweroff ;;
 "Reboot") systemctl reboot ;;
 *) exit 1 ;;
