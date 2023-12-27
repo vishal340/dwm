@@ -63,6 +63,7 @@
 #define HEIGHT(X) ((X)->h + 2 * (X)->bw)
 #define NUMTAGS (LENGTH(tags) + LENGTH(scratchpads))
 #define TAGMASK ((1 << NUMTAGS) - 1)
+#define TAGSLENGTH (LENGTH(tags))
 #define SPTAG(i) ((1 << LENGTH(tags)) << (i))
 #define SPTAGMASK (((1 << LENGTH(scratchpads)) - 1) << LENGTH(tags))
 #define TEXTW(X) (drw_fontset_getwidth(drw, (X)) + lrpad)
@@ -101,6 +102,10 @@ enum {
   NetWMWindowType,
   NetWMWindowTypeDialog,
   NetClientList,
+  NetDesktopNames,
+  NetDesktopViewport,
+  NetNumberOfDesktops,
+  NetCurrentDesktop,
   NetLast,
 };                                           /* EWMH atoms */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
@@ -287,13 +292,17 @@ static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2,
                      long d3, long d4);
 static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
+static void setcurrentdesktop(void);
+static void setdesktopnames(void);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setsticky(Client *c, int sticky);
 static void setlayout(const Arg *arg);
 static void setmark(Client *c);
 static void setmfact(const Arg *arg);
+static void setnumdesktops(void);
 static void setup(void);
+static void setviewport(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void spawn(const Arg *arg);
@@ -315,6 +324,7 @@ static void toggleview(const Arg *arg);
 static void unfocus(Client *c, int setfocus);
 static void unmanage(Client *c, int destroyed);
 static void unmapnotify(XEvent *e);
+static void updatecurrentdesktop(void);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void updateclientlist(void);
@@ -430,19 +440,48 @@ void combotag(const Arg *arg) {
 }
 
 void comboview(const Arg *arg) {
+  int i;
+  unsigned int tmptag;
+
   unsigned newtags = arg->ui & TAGMASK;
   if (combo) {
     selmon->tagset[selmon->seltags] |= newtags;
   } else {
     selmon->seltags ^= 1; /*toggle tagset*/
     combo = 1;
-    if (newtags)
+    if (newtags) {
       selmon->tagset[selmon->seltags] = newtags;
-  }
-  focus(NULL);
-  arrange(selmon);
-}
+      selmon->pertag->prevtag = selmon->pertag->curtag;
 
+      if (arg->ui == ~0)
+        selmon->pertag->curtag = 0;
+      else {
+        for (i = 0; !(arg->ui & 1 << i); i++)
+          ;
+        selmon->pertag->curtag = i + 1;
+      }
+    } else {
+      tmptag = selmon->pertag->prevtag;
+      selmon->pertag->prevtag = selmon->pertag->curtag;
+      selmon->pertag->curtag = tmptag;
+    }
+
+    selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+    selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+    selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
+    selmon->lt[selmon->sellt] =
+        selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+    selmon->lt[selmon->sellt ^ 1] =
+        selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt ^ 1];
+
+    if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+      togglebar(NULL);
+
+    focus(NULL);
+    arrange(selmon);
+    updatecurrentdesktop();
+  }
+}
 /* function implementations */
 void applyrules(Client *c) {
   const char *class, *instance;
@@ -1342,8 +1381,6 @@ void manage(Window w, XWindowAttributes *wa) {
   updatewindowtype(c);
   updatesizehints(c);
   updatewmhints(c);
-  c->x = c->mon->mx + (c->mon->mw - WIDTH(c)) / 2;
-  c->y = c->mon->my + (c->mon->mh - HEIGHT(c)) / 2;
   XSelectInput(dpy, w,
                EnterWindowMask | FocusChangeMask | PropertyChangeMask |
                    StructureNotifyMask);
@@ -1531,6 +1568,16 @@ void pop(Client *c) {
   focus(c);
   arrange(c->mon);
 }
+void setcurrentdesktop(void) {
+  long data[] = {0};
+  XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char *)data, 1);
+}
+void setdesktopnames(void) {
+  XTextProperty text;
+  Xutf8TextListToTextProperty(dpy, tags, TAGSLENGTH, XUTF8StringStyle, &text);
+  XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
+}
 
 void propertynotify(XEvent *e) {
   Client *c;
@@ -1716,6 +1763,11 @@ void resizemouse(const Arg *arg) {
     selmon = m;
     focus(NULL);
   }
+}
+void setviewport(void) {
+  long data[] = {0, 0};
+  XChangeProperty(dpy, root, netatom[NetDesktopViewport], XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char *)data, 2);
 }
 
 void resizerequest(XEvent *e) {
@@ -1916,6 +1968,12 @@ int sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2,
   return exists;
 }
 
+void setnumdesktops(void) {
+  long data[] = {TAGSLENGTH};
+  XChangeProperty(dpy, root, netatom[NetNumberOfDesktops], XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char *)data, 1);
+}
+
 void setfocus(Client *c) {
   if (!c->neverfocus) {
     XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
@@ -1966,6 +2024,16 @@ void setsticky(Client *c, int sticky) {
     arrange(c->mon);
   }
 }
+void updatecurrentdesktop(void) {
+  long rawdata[] = {selmon->tagset[selmon->seltags]};
+  int i = 0;
+  while (*rawdata >> i + 1) {
+    i++;
+  }
+  long data[] = {i};
+  XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32,
+                  PropModeReplace, (unsigned char *)data, 1);
+}
 
 void setlayout(const Arg *arg) {
   if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt])
@@ -2008,7 +2076,7 @@ void setmfact(const Arg *arg) {
   f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
   if (f < 0.05 || f > 0.95)
     return;
-  selmon->mfact = f;
+  selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
   arrange(selmon);
 }
 
@@ -2063,6 +2131,12 @@ void setup(void) {
   netatom[NetWMWindowTypeDialog] =
       XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
   netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+  netatom[NetDesktopViewport] =
+      XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
+  netatom[NetNumberOfDesktops] =
+      XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
+  netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
+  netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
   xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
   xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
   xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
@@ -2090,6 +2164,10 @@ void setup(void) {
   /* EWMH support per view */
   XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
                   PropModeReplace, (unsigned char *)netatom, NetLast);
+  setnumdesktops();
+  setcurrentdesktop();
+  setdesktopnames();
+  setviewport();
   XDeleteProperty(dpy, root, netatom[NetClientList]);
   /* select events */
   wa.cursor = cursor[CurNormal]->cursor;
@@ -2304,8 +2382,8 @@ void drawTab(int nwins, int first, Monitor *m) {
       posY += 0;
 
     h = selmon->maxHTab;
-    /* XCreateWindow(display, parent, x, y, width, height, border_width, depth,
-     * class, visual, valuemask, attributes); just reference */
+    /* XCreateWindow(display, parent, x, y, width, height, border_width,
+     * depth, class, visual, valuemask, attributes); just reference */
     m->tabwin = XCreateWindow(dpy, root, posX, posY, selmon->maxWTab,
                               selmon->maxHTab, 2, DefaultDepth(dpy, screen),
                               CopyFromParent, DefaultVisual(dpy, screen),
@@ -2360,7 +2438,8 @@ void altTabStart(const Arg *arg) {
     for (c = m->clients; c; c = c->next) { /* count clients */
       if (!ISVISIBLE(c))
         continue;
-      /* if (HIDDEN(c)) continue; uncomment if you're using awesomebar patch */
+      /* if (HIDDEN(c)) continue; uncomment if you're using awesomebar patch
+       */
 
       ++m->nTabs;
 
@@ -2635,6 +2714,7 @@ void toggletag(const Arg *arg) {
     focus(NULL);
     arrange(selmon);
   }
+  updatecurrentdesktop();
 }
 
 void toggleview(const Arg *arg) {
@@ -2673,6 +2753,7 @@ void toggleview(const Arg *arg) {
     focus(NULL);
     arrange(selmon);
   }
+  updatecurrentdesktop();
 }
 
 void unfocus(Client *c, int setfocus) {
@@ -3329,18 +3410,16 @@ int main(int argc, char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-void
-focusmaster(const Arg *arg)
-{
-	Client *c;
+void focusmaster(const Arg *arg) {
+  Client *c;
 
-	if (selmon->nmaster < 1)
-		return;
-	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
-		return;
+  if (selmon->nmaster < 1)
+    return;
+  if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
+    return;
 
-	c = nexttiled(selmon->clients);
+  c = nexttiled(selmon->clients);
 
-	if (c)
-		focus(c);
+  if (c)
+    focus(c);
 }
