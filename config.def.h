@@ -91,7 +91,8 @@ static const Layout layouts[] = {
     /* symbol     arrange function */
     {"[]=", tile}, /* first entry is default */
     {"><>", NULL}, /* no layout function means floating behavior */
-    {"[M]", monocle}, {"HHH", grid}, {"TTT", bstack}, {"===", bstackhoriz},
+    {"[M]", monocle},     {"HHH", grid},       {"TTT", bstack},
+    {"===", bstackhoriz}, {"III", horizontal},
 };
 
 /* key definitions */
@@ -145,6 +146,8 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_p, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
+    {MODKEY | ShiftMask, XK_r, spawn,
+     SHCMD("$HOME/Downloads/dwm/scripts/refresh.sh")},
     {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
@@ -161,6 +164,7 @@ static const Key keys[] = {
     {MODKEY, XK_t, setlayout, {.v = &layouts[0]}},
     {MODKEY, XK_f, setlayout, {.v = &layouts[1]}},
     {MODKEY, XK_m, setlayout, {.v = &layouts[2]}},
+    {MODKEY, XK_e, setlayout, {.v = &layouts[6]}},
     {MODKEY, XK_g, setlayout, {.v = &layouts[3]}},
     {MODKEY | ShiftMask, XK_t, setlayout, {.v = &layouts[4]}},
     {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[5]}},

@@ -91,15 +91,16 @@ static const Layout layouts[] = {
     /* symbol     arrange function */
     {"[]=", tile}, /* first entry is default */
     {"><>", NULL}, /* no layout function means floating behavior */
-    {"[M]", monocle}, {"HHH", grid}, {"TTT", bstack}, {"===", bstackhoriz},
+    {"[M]", monocle},     {"HHH", grid},       {"TTT", bstack},
+    {"===", bstackhoriz}, {"III", horizontal},
 };
 
 /* key definitions */
 #define MODKEY Mod4Mask
 #define TAGKEYS(KEY, TAG)                                                      \
-  {MODKEY, KEY, view, {.ui = 1 << TAG}},                                       \
+  {MODKEY, KEY, comboview, {.ui = 1 << TAG}},                                  \
       {MODKEY | ControlMask, KEY, toggleview, {.ui = 1 << TAG}},               \
-      {MODKEY | ShiftMask, KEY, tag, {.ui = 1 << TAG}},                        \
+      {MODKEY | ShiftMask, KEY, combotag, {.ui = 1 << TAG}},                   \
       {MODKEY | ControlMask | ShiftMask, KEY, toggletag, {.ui = 1 << TAG}},
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
@@ -158,18 +159,19 @@ static const Key keys[] = {
     {MODKEY, XK_h, setmfact, {.f = -0.05}},
     {MODKEY, XK_l, setmfact, {.f = +0.05}},
     {MODKEY, XK_Return, zoom, {0}},
-    {MODKEY, XK_q, view, {0}},
+    {MODKEY, XK_q, comboview, {0}},
     {MODKEY | ShiftMask, XK_c, killclient, {0}},
     {MODKEY, XK_t, setlayout, {.v = &layouts[0]}},
     {MODKEY, XK_f, setlayout, {.v = &layouts[1]}},
     {MODKEY, XK_m, setlayout, {.v = &layouts[2]}},
+    {MODKEY, XK_e, setlayout, {.v = &layouts[6]}},
     {MODKEY, XK_g, setlayout, {.v = &layouts[3]}},
     {MODKEY | ShiftMask, XK_t, setlayout, {.v = &layouts[4]}},
     {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[5]}},
     {MODKEY, XK_space, setlayout, {0}},
     {MODKEY | ShiftMask, XK_space, togglefloating, {0}},
     // {MODKEY, XK_0, view, {.ui = ~0}},
-    {MODKEY | ShiftMask, XK_0, tag, {.ui = ~0}},
+    {MODKEY | ShiftMask, XK_0, combotag, {.ui = ~0}},
     {MODKEY, XK_comma, focusmon, {.i = -1}},
     {MODKEY, XK_period, focusmon, {.i = +1}},
     {MODKEY | ShiftMask, XK_comma, tagmon, {.i = -1}},
@@ -203,8 +205,8 @@ static const Button buttons[] = {
     {ClkClientWin, MODKEY, Button1, movemouse, {0}},
     {ClkClientWin, MODKEY, Button2, togglefloating, {0}},
     {ClkClientWin, MODKEY, Button1, resizemouse, {0}},
-    {ClkTagBar, 0, Button1, view, {0}},
+    {ClkTagBar, 0, Button1, comboview, {0}},
     {ClkTagBar, 0, Button3, toggleview, {0}},
-    {ClkTagBar, MODKEY, Button1, tag, {0}},
+    {ClkTagBar, MODKEY, Button1, combotag, {0}},
     {ClkTagBar, MODKEY, Button3, toggletag, {0}},
 };

@@ -1,3 +1,6 @@
+This is my modification of dwm(dynamic window manager) by suckless.
+Check dwm.md for furthur instructions on this mmodification specific stuff
+
 dwm - dynamic window manager
 ============================
 dwm is an extremely fast, small, and dynamic window manager for X.

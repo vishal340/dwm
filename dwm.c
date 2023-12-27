@@ -256,6 +256,7 @@ static unsigned int getsystraywidth();
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
+static void horizontal(Monitor *m);
 static void incnmaster(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
@@ -298,7 +299,7 @@ static void spawn(const Arg *arg);
 static void swapclient(const Arg *arg);
 static void swapfocus(const Arg *arg);
 static Monitor *systraytomon(Monitor *m);
-static void tag(const Arg *arg);
+// static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void tagtonext(const Arg *arg);
 static void tagtoprev(const Arg *arg);
@@ -326,7 +327,7 @@ static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static void updatetitle(Client *c);
 static void updatewindowtype(Client *c);
 static void updatewmhints(Client *c);
-static void view(const Arg *arg);
+// static void view(const Arg *arg);
 static void viewnext(const Arg *arg);
 static void viewprev(const Arg *arg);
 static Client *wintoclient(Window w);
@@ -342,6 +343,10 @@ void drawTab(int nwins, int first, Monitor *m);
 void altTabStart(const Arg *arg);
 static void altTabEnd();
 static void getclassname(Client *c);
+
+static void keyrelease(XEvent *e);
+static void combotag(const Arg *arg);
+static void comboview(const Arg *arg);
 
 /* variables */
 static const char autostartblocksh[] = "autostart_blocking.sh";
@@ -359,6 +364,7 @@ static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent])(XEvent *) = {
     [ButtonPress] = buttonpress,
+    [ButtonRelease] = keyrelease,
     [ClientMessage] = clientmessage,
     [ConfigureRequest] = configurerequest,
     [ConfigureNotify] = configurenotify,
@@ -366,6 +372,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [EnterNotify] = enternotify,
     [Expose] = expose,
     [FocusIn] = focusin,
+    [KeyRelease] = keyrelease,
     [KeyPress] = keypress,
     [MappingNotify] = mappingnotify,
     [MapRequest] = maprequest,
@@ -400,6 +407,37 @@ struct Pertag {
 struct NumTags {
   char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
 };
+
+static int combo = 0;
+
+void keyrelease(XEvent *e) { combo = 0; }
+
+void combotag(const Arg *arg) {
+  if (selmon->sel && arg->ui & TAGMASK) {
+    if (combo) {
+      selmon->sel->tags |= arg->ui & TAGMASK;
+    } else {
+      combo = 1;
+      selmon->sel->tags = arg->ui & TAGMASK;
+    }
+    focus(NULL);
+    arrange(selmon);
+  }
+}
+
+void comboview(const Arg *arg) {
+  unsigned newtags = arg->ui & TAGMASK;
+  if (combo) {
+    selmon->tagset[selmon->seltags] |= newtags;
+  } else {
+    selmon->seltags ^= 1; /*toggle tagset*/
+    combo = 1;
+    if (newtags)
+      selmon->tagset[selmon->seltags] = newtags;
+  }
+  focus(NULL);
+  arrange(selmon);
+}
 
 /* function implementations */
 void applyrules(Client *c) {
@@ -610,7 +648,7 @@ void cleanup(void) {
   size_t i;
 
   altTabEnd();
-  view(&a);
+  comboview(&a);
   selmon->lt[selmon->sellt] = &foo;
   for (m = mons; m; m = m->next)
     while (m->stack)
@@ -1188,6 +1226,22 @@ void grabkeys(void) {
   }
 }
 
+void horizontal(Monitor *m) {
+  Client *c;
+  unsigned int n, i;
+
+  /* Count windows */
+  for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++)
+    ;
+
+  if (!n)
+    return;
+  else /* Split vertically */
+    for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+      resize(c, m->wx + i * m->mw / n, m->wy, m->mw / n - (2 * c->bw),
+             m->wh - (2 * c->bw), False);
+}
+
 void incnmaster(const Arg *arg) {
   selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] =
       MAX(selmon->nmaster + arg->i, 0);
@@ -1516,8 +1570,8 @@ void tagtonext(const Arg *arg) {
   if ((tmp = nexttag()) == selmon->tagset[selmon->seltags])
     return;
 
-  tag(&(const Arg){.ui = tmp});
-  view(&(const Arg){.ui = tmp});
+  combotag(&(const Arg){.ui = tmp});
+  comboview(&(const Arg){.ui = tmp});
 }
 
 void tagtoprev(const Arg *arg) {
@@ -1529,8 +1583,8 @@ void tagtoprev(const Arg *arg) {
   if ((tmp = prevtag()) == selmon->tagset[selmon->seltags])
     return;
 
-  tag(&(const Arg){.ui = tmp});
-  view(&(const Arg){.ui = tmp});
+  combotag(&(const Arg){.ui = tmp});
+  comboview(&(const Arg){.ui = tmp});
 }
 
 void quit(const Arg *arg) { running = 0; }
@@ -2451,14 +2505,14 @@ void togglemark(const Arg *arg) {
   setmark(selmon->sel == mark ? 0 : selmon->sel);
 }
 
-void tag(const Arg *arg) {
-  if (selmon->sel && arg->ui & TAGMASK) {
-    selmon->sel->tags = arg->ui & TAGMASK;
-    focus(NULL);
-    arrange(selmon);
-  }
-}
-
+// void tag(const Arg *arg) {
+//   if (selmon->sel && arg->ui & TAGMASK) {
+//     selmon->sel->tags = arg->ui & TAGMASK;
+//     focus(NULL);
+//     arrange(selmon);
+//   }
+// }
+//
 void tagmon(const Arg *arg) {
   if (!selmon->sel || !mons->next)
     return;
@@ -3015,48 +3069,48 @@ void updatewmhints(Client *c) {
   }
 }
 
-void view(const Arg *arg) {
-  int i;
-  unsigned int tmptag;
+// void view(const Arg *arg) {
+//   int i;
+//   unsigned int tmptag;
+//
+//   if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
+//     return;
+//   selmon->seltags ^= 1; /* toggle sel tagset */
+//   if (arg->ui & TAGMASK) {
+//     selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
+//     selmon->pertag->prevtag = selmon->pertag->curtag;
+//
+//     if (arg->ui == ~0)
+//       selmon->pertag->curtag = 0;
+//     else {
+//       for (i = 0; !(arg->ui & 1 << i); i++)
+//         ;
+//       selmon->pertag->curtag = i + 1;
+//     }
+//   } else {
+//     tmptag = selmon->pertag->prevtag;
+//     selmon->pertag->prevtag = selmon->pertag->curtag;
+//     selmon->pertag->curtag = tmptag;
+//   }
+//
+//   selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+//   selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+//   selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
+//   selmon->lt[selmon->sellt] =
+//       selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+//   selmon->lt[selmon->sellt ^ 1] =
+//       selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt ^ 1];
+//
+//   if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+//     togglebar(NULL);
+//
+//   focus(NULL);
+//   arrange(selmon);
+// }
+//
+void viewnext(const Arg *arg) { comboview(&(const Arg){.ui = nexttag()}); }
 
-  if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-    return;
-  selmon->seltags ^= 1; /* toggle sel tagset */
-  if (arg->ui & TAGMASK) {
-    selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
-    selmon->pertag->prevtag = selmon->pertag->curtag;
-
-    if (arg->ui == ~0)
-      selmon->pertag->curtag = 0;
-    else {
-      for (i = 0; !(arg->ui & 1 << i); i++)
-        ;
-      selmon->pertag->curtag = i + 1;
-    }
-  } else {
-    tmptag = selmon->pertag->prevtag;
-    selmon->pertag->prevtag = selmon->pertag->curtag;
-    selmon->pertag->curtag = tmptag;
-  }
-
-  selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
-  selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
-  selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-  selmon->lt[selmon->sellt] =
-      selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-  selmon->lt[selmon->sellt ^ 1] =
-      selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt ^ 1];
-
-  if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
-    togglebar(NULL);
-
-  focus(NULL);
-  arrange(selmon);
-}
-
-void viewnext(const Arg *arg) { view(&(const Arg){.ui = nexttag()}); }
-
-void viewprev(const Arg *arg) { view(&(const Arg){.ui = prevtag()}); }
+void viewprev(const Arg *arg) { comboview(&(const Arg){.ui = prevtag()}); }
 
 Client *wintoclient(Window w) {
   Client *c;
