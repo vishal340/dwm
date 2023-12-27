@@ -245,6 +245,7 @@ static void drawbar(Monitor *m);
 static void drawbars(void);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
+static Client *findbefore(Client *c);
 static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
@@ -348,10 +349,13 @@ static void keyrelease(XEvent *e);
 static void combotag(const Arg *arg);
 static void comboview(const Arg *arg);
 
+static void focusmaster(const Arg *arg);
+
 /* variables */
 static const char autostartblocksh[] = "autostart_blocking.sh";
 static const char autostartsh[] = "autostart.sh";
 static Systray *systray = NULL;
+static Client *prevzoom = NULL;
 static const char broken[] = "broken";
 static const char dwmdir[] = "dwm";
 static const char localshare[] = ".local/share";
@@ -1029,6 +1033,15 @@ void expose(XEvent *e) {
     if (m == selmon)
       updatesystray();
   }
+}
+
+Client *findbefore(Client *c) {
+  Client *tmp;
+  if (c == selmon->clients)
+    return NULL;
+  for (tmp = selmon->clients; tmp && tmp->next != c; tmp = tmp->next)
+    ;
+  return tmp;
 }
 
 void focus(Client *c) {
@@ -3196,12 +3209,37 @@ Monitor *systraytomon(Monitor *m) {
 
 void zoom(const Arg *arg) {
   Client *c = selmon->sel;
+  Client *at = NULL, *cold, *cprevious = NULL;
 
   if (!selmon->lt[selmon->sellt]->arrange || !c || c->isfloating)
     return;
-  if (c == nexttiled(selmon->clients) && !(c = nexttiled(c->next)))
-    return;
-  pop(c);
+  if (c == nexttiled(selmon->clients)) {
+    at = findbefore(prevzoom);
+    if (at)
+      cprevious = nexttiled(at->next);
+    if (!cprevious || cprevious != prevzoom) {
+      prevzoom = NULL;
+      if (!c || !(c = nexttiled(c->next)))
+        return;
+    } else
+      c = cprevious;
+  }
+  cold = nexttiled(selmon->clients);
+  if (c != cold && !at)
+    at = findbefore(c);
+  detach(c);
+  attach(c);
+  /* swap windows instead of pushing the previous one down */
+  if (c != cold && at) {
+    prevzoom = cold;
+    if (cold && at != cold) {
+      detach(cold);
+      cold->next = at->next;
+      at->next = cold;
+    }
+  }
+  focus(c);
+  arrange(c->mon);
 }
 
 static void bstack(Monitor *m) {
@@ -3289,4 +3327,20 @@ int main(int argc, char *argv[]) {
   cleanup();
   XCloseDisplay(dpy);
   return EXIT_SUCCESS;
+}
+
+void
+focusmaster(const Arg *arg)
+{
+	Client *c;
+
+	if (selmon->nmaster < 1)
+		return;
+	if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen))
+		return;
+
+	c = nexttiled(selmon->clients);
+
+	if (c)
+		focus(c);
 }

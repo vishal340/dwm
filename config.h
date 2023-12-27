@@ -58,12 +58,11 @@ const char *spcmd2[] = {"qalculate-qt", NULL};
 static Sp scratchpads[] = {
     /* name          cmd  */
     {"Bitwarden", spcmd1},
-    {"calnulator", spcmd2},
+    {"calculator", spcmd2},
 };
 
 /* tagging */
-static const char *tags[] = {"1", "2", "3", "4", "5", "6",
-                             "7", "8", "9", "0", "-", "="};
+static const char *tags[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
 static const Rule rules[] = {
     /* xprop(1):
@@ -72,9 +71,9 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {"microsoft-edge-stable", NULL, NULL, 1 << 1, 0, -1, 40, 23, 80, 45, 1},
-    {"bitwarden-desktop", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
-    {"qalculate-qt", NULL, NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
+    {NULL, "microsoft-edge", NULL, 1 << 0, 0, -1, 40, 23, 80, 45, 1},
+    {NULL, "bitwarden", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
+    {NULL, "qalculate-qt", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
 };
 
 /* layout(s) */
@@ -170,7 +169,8 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_g, setlayout, {.v = &layouts[5]}},
     {MODKEY, XK_space, setlayout, {0}},
     {MODKEY | ShiftMask, XK_space, togglefloating, {0}},
-    // {MODKEY, XK_0, view, {.ui = ~0}},
+    {MODKEY | ControlMask, XK_space, focusmaster, {0}},
+    {MODKEY, XK_0, comboview, {.ui = ~0}},
     {MODKEY | ShiftMask, XK_0, combotag, {.ui = ~0}},
     {MODKEY, XK_comma, focusmon, {.i = -1}},
     {MODKEY, XK_period, focusmon, {.i = +1}},
@@ -190,8 +190,8 @@ static const Key keys[] = {
             TAGKEYS(XK_9, 8) TAGKEYS(XK_0, 9) TAGKEYS(XK_minus, 10)
                 TAGKEYS(XK_equal, 11){MODKEY | ShiftMask, XK_q, quit, {0}},
     {MODKEY, XK_semicolon, togglemark, {0}},
-    {MODKEY, XK_o, swapfocus, {0}},
-    {MODKEY | ShiftMask, XK_o, swapclient, {0}},
+    {MODKEY | ShiftMask, XK_semicolon, swapfocus, {0}},
+    {MODKEY | ControlMask | ShiftMask, XK_semicolon, swapclient, {0}},
 };
 
 /* button definitions */
