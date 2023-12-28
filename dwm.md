@@ -1,6 +1,6 @@
 ### The patch combo:
 
-- Add [combotag]() and comboview functions to dwm.c
+- Add combotag() and comboview() functions to dwm.c
 - Replace tag and view function with combotag and comboview respectively in dwm.c and config.h
 - Be aware that we will have to replace this in future patches if necessary
 
@@ -9,4 +9,4 @@
 
 Create symlink of powermenu and power_profile in /usr/local/bin/.
 
-Setup [slstatus](../blob/main/slstatus) as you need in its config.h file.
+Setup [slstatus](../../tree/master/slstatus-1.0) as you need in its [config.h](../../tree/master/slstatus-1.0/config.h) file.
