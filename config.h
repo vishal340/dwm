@@ -71,9 +71,10 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {NULL, "microsoft-edge", NULL, 1 << 0, 0, -1, 40, 23, 80, 45, 1},
+    {"microsoft-edge", NULL, NULL, ~0, 0, -1, 40, 23, 80, 45, 1},
     {NULL, "bitwarden", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "qalculate-qt", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
+    {NULL, "steam", NULL, 1 << 7, 0, -1, 0, 0, 48, 27, 1},
 };
 
 /* layout(s) */

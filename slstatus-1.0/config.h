@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* interval between updates (in ms) */
-const unsigned int interval = 10000;
+const unsigned int interval = 20000;
 
 /* text to show if no value can be retrieved */
 static const char unknown_str[] = "n/a";
@@ -76,5 +76,6 @@ static const struct arg args[] = {
     {battery_perc, "%s%%", "BAT0"},
     {run_command, "  %s",
      "amixer sget Master | awk -F'[][]' '/(Mono:|Right:).*on/ { print $2 }'"},
+    {run_command, "%s", "bluetooth_battery"},
     {run_command, " 󰃞 %s%%", "brightnessctl g"},
 };
