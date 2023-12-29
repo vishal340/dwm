@@ -1,20 +1,5 @@
 /* See LICENSE file for copyright and license details. */ /* alt-tab
                                                              configuration */
-static const unsigned int tabModKey =
-    0x40; /* if this key is hold the alt-tab functionality stays acitve. This
-             key must be the same as key that is used to active functin
-             altTabStart `*/
-static const unsigned int tabCycleKey =
-    0x17; /* if this key is hit the alt-tab program moves one position forward
-             in clients stack. This key must be the same as key that is used to
-             active functin altTabStart */
-static const unsigned int tabCycleKey2 = 0x31; /* grave key */
-static const unsigned int tabPosY =
-    1; /* tab position on Y axis, 0 = bottom, 1 = center, 2 = top */
-static const unsigned int tabPosX =
-    1; /* tab position on X axis, 0 = left, 1 = center, 2 = right */
-static const unsigned int maxWTab = 600; /* tab menu width */
-static const unsigned int maxHTab = 200; /* tab menu height */
 
 /* appearance */
 static const unsigned int borderpx = 1; /* border pixel of windows */
@@ -47,6 +32,7 @@ static const char *colors[][4] = {
     /*               fg         bg         border     mark   */
     [SchemeNorm] = {col_gray3, col_gray1, col_gray2, normmarkcolor},
     [SchemeSel] = {col_gray4, col_cyan, col_cyan, selmarkcolor},
+    [SchemeHid] = {col_cyan, col_gray1, col_cyan},
 };
 
 typedef struct {
@@ -71,9 +57,10 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {NULL, "microsoft-edge", NULL, 1 << 0, 0, -1, 40, 23, 80, 45, 1},
+    {"microsoft-edge", NULL, NULL, ~0, 0, -1, 40, 23, 80, 45, 1},
     {NULL, "bitwarden", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "qalculate-qt", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
+    {NULL, "steam", NULL, 1 << 7, 0, -1, 0, 0, 48, 27, 1},
 };
 
 /* layout(s) */
@@ -143,8 +130,7 @@ static const Key keys[] = {
     {ShiftMask, XK_Print, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/screenshotsel.sh")},
     {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
-    {MODKEY | ShiftMask, XK_p, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/power_profile.sh")},
+    {MODKEY | ShiftMask, XK_p, spawn, SHCMD("power_profile")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
     {MODKEY | ShiftMask, XK_r, spawn,
      SHCMD("$HOME/Downloads/dwm/scripts/refresh.sh")},
@@ -152,8 +138,10 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
     {MODKEY, XK_s, togglesticky, {0}},
-    {MODKEY, XK_j, focusstack, {.i = +1}},
-    {MODKEY, XK_k, focusstack, {.i = -1}},
+    {MODKEY, XK_j, focusstackvis, {.i = +1}},
+    {MODKEY, XK_k, focusstackvis, {.i = -1}},
+    {MODKEY | ShiftMask, XK_j, focusstackhid, {.i = +1}},
+    {MODKEY | ShiftMask, XK_k, focusstackhid, {.i = -1}},
     {MODKEY, XK_i, incnmaster, {.i = +1}},
     {MODKEY, XK_d, incnmaster, {.i = -1}},
     {MODKEY, XK_h, setmfact, {.f = -0.05}},
@@ -177,12 +165,13 @@ static const Key keys[] = {
     {MODKEY, XK_period, focusmon, {.i = +1}},
     {MODKEY | ShiftMask, XK_comma, tagmon, {.i = -1}},
     {MODKEY | ShiftMask, XK_period, tagmon, {.i = +1}},
+    {MODKEY | ShiftMask, XK_s, show, {0}},
+    {MODKEY | ControlMask | ShiftMask, XK_s, showall, {0}},
+    {MODKEY | ShiftMask, XK_h, hide, {0}},
     {MODKEY, XK_Right, viewnext, {0}},
     {MODKEY, XK_Left, viewprev, {0}},
     {MODKEY | ShiftMask, XK_Right, tagtonext, {0}},
     {MODKEY | ShiftMask, XK_Left, tagtoprev, {0}},
-    {Mod1Mask, XK_Tab, altTabStart, {.i = 1}},
-    {Mod1Mask | ShiftMask, XK_Tab, altTabStart, {.i = 0}},
     {MODKEY, XK_y, togglescratch, {.ui = 0}},
     {MODKEY, XK_u, togglescratch, {.ui = 1}},
     {MODKEY, XK_x, togglescratch, {.ui = 2}},
