@@ -7,5 +7,5 @@ resolution=$(xrandr | awk -v var="$screen" -v count=0 '/.*\*.*/{count++; if(coun
 response=$(($(xrandr | awk -v var="$screen" -v count=0 '/.*\*.*/{count++;
 	if(count==var)
 for(i=2;i<=NF;i++)if($i!="+")print $i
-}' | sed -E 's/(^[^.*]*).*/\1/' | tr " " "\n" | dmenu -m $screen -l 20 -i -p "choose refresh rate:")))
+}' | sed -E 's/(^[^.*]*).*/\1/' | tr " " "\n" | dmenu -m $((screen - 1)) -l 20 -i -p "choose refresh rate:")))
 xrandr -s $resolution -r $response 2>/dev/null
