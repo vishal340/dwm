@@ -1,0 +1,6 @@
+#!/bin/sh
+
+while true; do
+	xsetroot -name "󰁹$(acpi | awk '{print $4}' | sed s/,//) $(date '+%d-%m-%y %H:%M')"
+	sleep 60
+done

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+case $1 in
+	1) brightnessctl s 10+ && pkill -36 dwmblocks ;;
+	2) brightnessctl s 10- && pkill -36 dwmblocks ;;
+esac

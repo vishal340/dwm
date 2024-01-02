@@ -1,9 +1,0 @@
-#!/bin/sh
-
-headset=NULL
-headset=$(bluetoothctl info | awk '{if(($1 == "Icon:" && $2 != "audio-headset") || ($1 == "Connected:" && $2 != "yes")) exit}END{ if($1 == "Battery")print $4}')
-if [[ $headset == "" ]]; then
-	echo 󰓃
-else
-	echo " "󰋋$headset
-fi

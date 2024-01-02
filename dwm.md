@@ -9,7 +9,9 @@
 
 ### Symlinks
 
-Create symlink of [powermenu](../../tree/master/scripts/powermenu) and [power_profile](../tree/master/scripta/power_profile) and [bluetooth_battery](../tree/master/scripts/bluetooth_battery) in /usr/local/bin/.
+Create symlink of [powermenu](../../tree/master/scripts/powermenu), [power_profile](../tree/master/scripts/power_profile), [bluetooth_battery](../tree/master/scripts/bluetooth_battery), [volume_change](../tree/master/scripts/volume_change) and [screen_brightness](../tree/master/scripts/screen_brightness) in /usr/local/bin/.
+
+Also, create a symlink of **dwm.desktop** and **startdwm** in /usr/share/xsessions/ and ~/.local/bin/ directory respectively.
 
 Setup [slstatus](../../tree/master/slstatus-1.0) as you need in its [config.h][2] file.
 

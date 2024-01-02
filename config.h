@@ -57,7 +57,6 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {"microsoft-edge", NULL, NULL, ~0, 0, -1, 40, 23, 80, 45, 1},
     {NULL, "bitwarden", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "qalculate-qt", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "steam", NULL, 1 << 7, 0, -1, 0, 0, 48, 27, 1},
@@ -99,6 +98,8 @@ static const Layout layouts[] = {
     .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL }                       \
   }
 
+#define STATUSBAR "dwmblocks"
+
 /* commands */
 static char dmenumon[2] =
     "0"; /* component of dmenucmd, manipulated in spawn() */
@@ -106,29 +107,21 @@ static const char *dmenucmd[] = {
     "dmenu_run", "-m",      dmenumon, "-fn",    dmenufont, "-nb",     col_gray1,
     "-nf",       col_gray3, "-sb",    col_cyan, "-sf",     col_gray4, NULL};
 static const char *clipmenu[] = {"clipmenu", NULL};
-static const char *brightnessup[] = {"brightnessctl", "s", "10+", NULL};
-static const char *brightnessdown[] = {"brightnessctl", "s", "10-", NULL};
 static const char *kbdbrightnessup[] = {
     "brightnessctl", "--device=asus::kbd_backlight", "s", "1+", NULL};
 static const char *kbdbrightnessdown[] = {
     "brightnessctl", "--device=asus::kbd_backlight", "s", "1-", NULL};
-static const char *up_vol[] = {"pactl", "set-sink-volume", "@DEFAULT_SINK@",
-                               "+10%", NULL};
-static const char *down_vol[] = {"pactl", "set-sink-volume", "@DEFAULT_SINK@",
-                                 "-10%", NULL};
-static const char *mute_vol[] = {"pactl", "set-sink-mute", "@DEFAULT_SINK@",
-                                 "toggle", NULL};
 static const char *termcmd[] = {"alacritty", NULL};
 
 static const Key keys[] = {
     /* modifier                     key        function        argument */
-    {0, 0x1008FF02, spawn, {.v = brightnessup}},
-    {0, 0x1008FF03, spawn, {.v = brightnessdown}},
+    {0, 0x1008FF02, spawn, SHCMD("screen_brightness 1")},
+    {0, 0x1008FF03, spawn, SHCMD("screen_brightness 2")},
     {0, 0x1008FF05, spawn, {.v = kbdbrightnessup}},
     {0, 0x1008FF06, spawn, {.v = kbdbrightnessdown}},
-    {0, 0x1008FF12, spawn, {.v = mute_vol}},
-    {0, 0x1008FF11, spawn, {.v = down_vol}},
-    {0, 0x1008FF13, spawn, {.v = up_vol}},
+    {0, 0x1008FF12, spawn, SHCMD("volume_change 2")},
+    {0, 0x1008FF11, spawn, SHCMD("volume_change 1")},
+    {0, 0x1008FF13, spawn, SHCMD("volume_change 3")},
     {MODKEY, XK_Tab, spawn, SHCMD("$HOME/Downloads/dwm/scripts/switch.sh")},
     {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
     {ShiftMask, XK_Print, spawn,
@@ -203,7 +196,9 @@ static const Button buttons[] = {
     /* click                event mask      button          function argument */
     {ClkLtSymbol, 0, Button1, setlayout, {0}},
     {ClkLtSymbol, 0, Button3, setlayout, {.v = &layouts[2]}},
-    {ClkStatusText, 0, Button2, spawn, {.v = termcmd}},
+    {ClkStatusText, 0, Button1, sigstatusbar, {.i = 1}},
+    {ClkStatusText, 0, Button2, sigstatusbar, {.i = 2}},
+    {ClkStatusText, 0, Button3, sigstatusbar, {.i = 3}},
     {ClkClientWin, MODKEY, Button1, movemouse, {0}},
     {ClkClientWin, MODKEY, Button2, togglefloating, {0}},
     {ClkClientWin, MODKEY, Button3, resizemouse, {0}},

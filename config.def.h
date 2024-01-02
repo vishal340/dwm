@@ -57,7 +57,6 @@ static const Rule rules[] = {
      */
     /* class      instance    title       tags mask     isfloating   monitor
        float x,y,w,h         floatborderpx*/
-    {"microsoft-edge", NULL, NULL, ~0, 0, -1, 40, 23, 80, 45, 1},
     {NULL, "bitwarden", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "qalculate-qt", NULL, ~0, 1, -1, 0, 0, 48, 27, 1},
     {NULL, "steam", NULL, 1 << 7, 0, -1, 0, 0, 48, 27, 1},
@@ -98,6 +97,8 @@ static const Layout layouts[] = {
   {                                                                            \
     .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL }                       \
   }
+
+#define STATUSBAR "dwmblocks"
 
 /* commands */
 static char dmenumon[2] =
@@ -203,7 +204,9 @@ static const Button buttons[] = {
     /* click                event mask      button          function argument */
     {ClkLtSymbol, 0, Button1, setlayout, {0}},
     {ClkLtSymbol, 0, Button3, setlayout, {.v = &layouts[2]}},
-    {ClkStatusText, 0, Button2, spawn, {.v = termcmd}},
+    {ClkStatusText, 0, Button1, sigstatusbar, {.i = 1}},
+    {ClkStatusText, 0, Button2, sigstatusbar, {.i = 2}},
+    {ClkStatusText, 0, Button3, sigstatusbar, {.i = 3}},
     {ClkClientWin, MODKEY, Button1, movemouse, {0}},
     {ClkClientWin, MODKEY, Button2, togglefloating, {0}},
     {ClkClientWin, MODKEY, Button3, resizemouse, {0}},

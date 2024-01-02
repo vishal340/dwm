@@ -1,7 +1,10 @@
 #!/bin/sh
 
-case "$(printf "Shutdown\nReboot\n" | dmenu -l 10 -i -p "System:")" in
+case "$(printf "Shutdown\nReboot\nLock\nHibernate\nThaw\n" | dmenu -l 5 -i -p "System:")" in
 "Shutdown") systemctl poweroff ;;
 "Reboot") systemctl reboot ;;
+"Lock") systemctl slock ;;
+"Hibernate") systemctl hibernate ;;
+"Thaw") systemctl thaw ;;
 *) exit 1 ;;
 esac
