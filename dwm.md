@@ -7,9 +7,9 @@
 - The patch [ewmhtags](../../tree/master/patches/dwm-ewmhtags-6.2.diff) modifies view. So, you have to patch combo first then patch this.
 - The patch [pertag](../../tree/master/patches/dwm-pertag-20200914-61bb8b2.diff) also modifies view. So, keep that in mind.
 
-### Symlinks
+### Symlinks from scripts
 
-Create symlink of [powermenu](../../tree/master/scripts/powermenu), [power_profile](../tree/master/scripts/power_profile), [bluetooth_battery](../tree/master/scripts/bluetooth_battery), [volume_change](../tree/master/scripts/volume_change) and [screen_brightness](../tree/master/scripts/screen_brightness) in /usr/local/bin/.
+Create symlink of powermenu, power_profile, bluetooth_battery, refresh, volume_change and screen_brightness in /usr/local/bin/.
 
 Also, create a symlink of **dwm.desktop** and **startdwm** in /usr/share/xsessions/ and ~/.local/bin/ directory respectively.
 

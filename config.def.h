@@ -2,7 +2,7 @@
                                                              configuration */
 
 /* appearance */
-static const unsigned int borderpx = 1; /* border pixel of windows */
+static const unsigned int borderpx = 2; /* border pixel of windows */
 static const unsigned int snap = 32;    /* snap pixel */
 static const unsigned int systraypinning =
     0; /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor
@@ -107,29 +107,21 @@ static const char *dmenucmd[] = {
     "dmenu_run", "-m",      dmenumon, "-fn",    dmenufont, "-nb",     col_gray1,
     "-nf",       col_gray3, "-sb",    col_cyan, "-sf",     col_gray4, NULL};
 static const char *clipmenu[] = {"clipmenu", NULL};
-static const char *brightnessup[] = {"brightnessctl", "s", "10+", NULL};
-static const char *brightnessdown[] = {"brightnessctl", "s", "10-", NULL};
 static const char *kbdbrightnessup[] = {
     "brightnessctl", "--device=asus::kbd_backlight", "s", "1+", NULL};
 static const char *kbdbrightnessdown[] = {
     "brightnessctl", "--device=asus::kbd_backlight", "s", "1-", NULL};
-static const char *up_vol[] = {"pactl", "set-sink-volume", "@DEFAULT_SINK@",
-                               "+10%", NULL};
-static const char *down_vol[] = {"pactl", "set-sink-volume", "@DEFAULT_SINK@",
-                                 "-10%", NULL};
-static const char *mute_vol[] = {"pactl", "set-sink-mute", "@DEFAULT_SINK@",
-                                 "toggle", NULL};
 static const char *termcmd[] = {"alacritty", NULL};
 
 static const Key keys[] = {
     /* modifier                     key        function        argument */
-    {0, 0x1008FF02, spawn, {.v = brightnessup}},
-    {0, 0x1008FF03, spawn, {.v = brightnessdown}},
+    {0, 0x1008FF02, spawn, SHCMD("screen_brightness 1")},
+    {0, 0x1008FF03, spawn, SHCMD("screen_brightness 2")},
     {0, 0x1008FF05, spawn, {.v = kbdbrightnessup}},
     {0, 0x1008FF06, spawn, {.v = kbdbrightnessdown}},
-    {0, 0x1008FF12, spawn, {.v = mute_vol}},
-    {0, 0x1008FF11, spawn, {.v = down_vol}},
-    {0, 0x1008FF13, spawn, {.v = up_vol}},
+    {0, 0x1008FF12, spawn, SHCMD("volume_change 2")},
+    {0, 0x1008FF11, spawn, SHCMD("volume_change 1")},
+    {0, 0x1008FF13, spawn, SHCMD("volume_change 3")},
     {MODKEY, XK_Tab, spawn, SHCMD("$HOME/Downloads/dwm/scripts/switch.sh")},
     {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
     {ShiftMask, XK_Print, spawn,
@@ -137,8 +129,7 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn, SHCMD("power_profile")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
-    {MODKEY | ShiftMask, XK_r, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/refresh.sh")},
+    {MODKEY | ShiftMask, XK_r, spawn, SHCMD("refresh")},
     {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},

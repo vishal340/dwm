@@ -2,7 +2,7 @@
                                                              configuration */
 
 /* appearance */
-static const unsigned int borderpx = 1; /* border pixel of windows */
+static const unsigned int borderpx = 2; /* border pixel of windows */
 static const unsigned int snap = 32;    /* snap pixel */
 static const unsigned int systraypinning =
     0; /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor
@@ -129,8 +129,7 @@ static const Key keys[] = {
     {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
     {MODKEY | ShiftMask, XK_p, spawn, SHCMD("power_profile")},
     {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
-    {MODKEY | ShiftMask, XK_r, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/refresh.sh")},
+    {MODKEY | ShiftMask, XK_r, spawn, SHCMD("refresh")},
     {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
