@@ -98,7 +98,7 @@ static const Layout layouts[] = {
     .v = (const char *[]) { "/bin/sh", "-c", cmd, NULL }                       \
   }
 
-#define STATUSBAR "dwmblocks"
+#define STATUSBAR "dwmblocks" 
 
 /* commands */
 static char dmenumon[2] =
@@ -106,31 +106,10 @@ static char dmenumon[2] =
 static const char *dmenucmd[] = {
     "dmenu_run", "-m",      dmenumon, "-fn",    dmenufont, "-nb",     col_gray1,
     "-nf",       col_gray3, "-sb",    col_cyan, "-sf",     col_gray4, NULL};
-static const char *clipmenu[] = {"clipmenu", NULL};
-static const char *kbdbrightnessup[] = {
-    "brightnessctl", "--device=asus::kbd_backlight", "s", "1+", NULL};
-static const char *kbdbrightnessdown[] = {
-    "brightnessctl", "--device=asus::kbd_backlight", "s", "1-", NULL};
-static const char *termcmd[] = {"alacritty", NULL};
+static const char *termcmd[] = {"st", NULL};
 
 static const Key keys[] = {
     /* modifier                     key        function        argument */
-    {0, 0x1008FF02, spawn, SHCMD("screen_brightness 1")},
-    {0, 0x1008FF03, spawn, SHCMD("screen_brightness 2")},
-    {0, 0x1008FF05, spawn, {.v = kbdbrightnessup}},
-    {0, 0x1008FF06, spawn, {.v = kbdbrightnessdown}},
-    {0, 0x1008FF12, spawn, SHCMD("volume_change 2")},
-    {0, 0x1008FF11, spawn, SHCMD("volume_change 1")},
-    {0, 0x1008FF13, spawn, SHCMD("volume_change 3")},
-    {MODKEY, XK_Tab, spawn, SHCMD("$HOME/Downloads/dwm/scripts/switch.sh")},
-    {0, XK_Print, spawn, SHCMD("$HOME/Downloads/dwm/scripts/screenshot.sh")},
-    {ShiftMask, XK_Print, spawn,
-     SHCMD("$HOME/Downloads/dwm/scripts/screenshotsel.sh")},
-    {MODKEY | ShiftMask, XK_e, spawn, SHCMD("powermenu")},
-    {MODKEY | ShiftMask, XK_p, spawn, SHCMD("power_profile")},
-    {MODKEY, XK_p, spawn, SHCMD("$HOME/Downloads/dwm/dmenu_run_history")},
-    {MODKEY | ShiftMask, XK_r, spawn, SHCMD("refresh")},
-    {MODKEY, XK_c, spawn, {.v = clipmenu}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
     {MODKEY, XK_s, togglesticky, {0}},
