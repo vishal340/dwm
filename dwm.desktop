@@ -1,8 +1,10 @@
 [Desktop Entry]
+Encoding=UTF-8
 Name=dwm
 Comment=dynamic window manager
-Exec=/home/vishal340/.local/bin/startdwm
+Exec=/usr/local/bin/startdwm
 TryExec=dwm
+Icon=dwm
 Type=Application
 X-LightDM-DesktopName=dwm
 DesktopNames=dwm

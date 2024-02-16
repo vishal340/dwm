@@ -9,11 +9,9 @@
 
 ### Symlinks from scripts
 
-Create symlink of powermenu, power_profile, bluetooth_battery, refresh, volume_change and screen_brightness in /usr/local/bin/.
+Create symlink of startdwm, powermenu, power_profile, bluetooth_battery, refresh and screen_brightness in /usr/local/bin/.
 
 Also, create a symlink of **dwm.desktop** and **startdwm** in /usr/share/xsessions/ and ~/.local/bin/ directory respectively.
-
-Setup [slstatus](../../tree/master/slstatus-1.0) as you need in its [config.h][2] file.
 
 ### Tricky conflict with title
 
